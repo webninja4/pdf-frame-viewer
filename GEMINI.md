@@ -62,6 +62,15 @@ This document summarizes key aspects of the `pdf-frame-viewer` WordPress plugin,
 *   **Editor Functionality Scope:**
     *   Limited the appearance of the "Add Split View PDF" button and related editor scripts (for both Classic and Block editors) to only WordPress **Pages**. They no longer appear on Posts, Custom Post Types (CPTs), or other admin screens.
 
+### **Document Library Pro Integration:**
+
+*   **Dynamic PDF Frame Viewer Links:**
+    *   Implemented integration with Document Library Pro plugin in the child theme (`functions.php`).
+    *   Added automatic "Open in PDF Frame View" button on Document CPT single pages.
+    *   Button only appears for documents with PDF file extensions.
+    *   Links to a dedicated viewer page with the `[dynamic_pdf_viewer]` shortcode.
+    *   Includes secure URL handling and validation.
+
 ---
 
 ## 3. Deferred / Discussed Items
