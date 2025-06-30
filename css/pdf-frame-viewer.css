@@ -1,0 +1,337 @@
+/* === Modern Redesign for PDF Frame Viewer === */
+
+/* --- Global Styles & Variables --- */
+:root {
+    --pfv-bg-color: #f7f8fa;
+    --pfv-surface-color: #ffffff;
+    --pfv-border-color: #e0e0e0;
+    --pfv-text-primary: #2c3e50;
+    --pfv-text-secondary: #576574;
+    --pfv-primary-color: #3498db;
+    --pfv-primary-color-dark: #2980b9;
+    --pfv-resizer-color: #c8d6e5;
+    --pfv-resizer-hover-color: #3498db;
+    --pfv-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    --pfv-border-radius: 6px;
+    --pfv-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+.pdf-frame-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--pfv-bg-color);
+    font-family: var(--pfv-font-family);
+    color: var(--pfv-text-primary);
+}
+
+/* --- Top Controls Area --- */
+.pdf-controls-container {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background-color: var(--pfv-surface-color);
+    border-bottom: 1px solid var(--pfv-border-color);
+    flex-wrap: wrap;
+}
+
+.pdf-url-input,
+.pdf-media-library-select {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px; /* Prevent excessive shrinking */
+}
+
+.pdf-url-input label,
+.pdf-media-library-select label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--pfv-text-secondary);
+    white-space: nowrap;
+}
+
+/* General Input & Button Styles */
+#pdf-input-url,
+#pdf-select-media,
+#pdf-load-button,
+.view-controls button {
+    border-radius: var(--pfv-border-radius);
+    border: 1px solid var(--pfv-border-color);
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+#pdf-input-url,
+#pdf-select-media {
+    flex: 1;
+    background-color: var(--pfv-bg-color);
+}
+
+#pdf-input-url:focus,
+#pdf-select-media:focus {
+    outline: none;
+    border-color: var(--pfv-primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+#pdf-load-button {
+    background-color: var(--pfv-primary-color);
+    color: white;
+    border-color: var(--pfv-primary-color);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+#pdf-load-button:hover {
+    background-color: var(--pfv-primary-color-dark);
+    border-color: var(--pfv-primary-color-dark);
+}
+
+#pdf-url-error {
+    width: 100%;
+    margin-top: 5px;
+    font-size: 13px;
+    color: #e74c3c;
+}
+
+/* --- View Toggles --- */
+.view-controls {
+    padding: 0 16px 16px;
+    background-color: var(--pfv-surface-color);
+    border-bottom: 1px solid var(--pfv-border-color);
+}
+
+.view-controls button {
+    background-color: transparent;
+    color: var(--pfv-text-secondary);
+    cursor: pointer;
+}
+
+.view-controls button:hover {
+    background-color: var(--pfv-bg-color);
+    color: var(--pfv-text-primary);
+}
+
+/* --- Split View & Panes --- */
+.pdf-split-view {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    gap: 8px;
+    padding: 8px;
+}
+
+.pdf-split-view.horizontal { flex-direction: row; }
+.pdf-split-view.vertical { flex-direction: column; }
+
+.pdf-pane {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--pfv-surface-color);
+    border-radius: var(--pfv-border-radius);
+    border: 1px solid var(--pfv-border-color);
+    box-shadow: var(--pfv-box-shadow);
+    position: relative; /* For resizer positioning */
+}
+
+/* Remove flex:1 from panes for manual resizing */
+.pdf-split-view.horizontal .pdf-pane { width: calc(50% - 4px); }
+.pdf-split-view.vertical .pdf-pane { height: calc(50% - 4px); }
+
+
+/* --- Resizer --- */
+.resizer {
+    background: var(--pfv-resizer-color);
+    z-index: 10;
+    transition: background-color 0.2s ease;
+    position: absolute;
+}
+
+.resizer:hover {
+    background: var(--pfv-resizer-hover-color);
+}
+
+.pdf-split-view.horizontal .resizer {
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    top: 0;
+    left: calc(50% - 4px);
+}
+
+.pdf-split-view.vertical .resizer {
+    height: 8px;
+    width: 100%;
+    cursor: row-resize;
+    left: 0;
+    top: calc(50% - 4px);
+}
+
+/* --- PDF Toolbar --- */
+.pdf-toolbar {
+    padding: 8px 12px;
+    background: var(--pfv-bg-color);
+    border-bottom: 1px solid var(--pfv-border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.page-controls, .zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pdf-toolbar button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--pfv-border-radius);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--pfv-text-secondary);
+}
+
+.pdf-toolbar button:hover,
+.pdf-toolbar button:focus {
+    background: #e0e0e0;
+    color: var(--pfv-text-primary);
+    outline: none; /* Remove focus outline */
+}
+
+.page-info {
+    font-size: 13px;
+    color: var(--pfv-text-secondary);
+    white-space: nowrap;
+}
+
+/* --- PDF Viewer --- */
+.pdf-viewer-container {
+    flex: 1;
+    overflow: auto;
+    scroll-behavior: smooth;
+    padding: 16px;
+}
+
+.pdf-viewer-container canvas {
+    display: block;
+    margin: 0 auto; /* Center canvas */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.pdf-page-wrapper {
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.pdf-link-annotation {
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    border: none; /* Remove the border */
+    background-color: transparent; /* Remove the background color */
+}
+.pdf-link-annotation:hover {
+    background-color: transparent; /* Remove the hover effect */
+}
+
+
+/* --- PDF Search --- */
+#pdf-search-input {
+    flex: 1;
+    background-color: var(--pfv-bg-color);
+    border-radius: var(--pfv-border-radius);
+    border: 1px solid var(--pfv-border-color);
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+#pdf-search-input:focus {
+    outline: none;
+    border-color: var(--pfv-primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+#pdf-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--pfv-surface-color);
+    border: 1px solid var(--pfv-border-color);
+    border-top: none;
+    border-radius: 0 0 var(--pfv-border-radius) var(--pfv-border-radius);
+    box-shadow: var(--pfv-box-shadow);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none; /* Hidden by default */
+}
+
+.pdf-media-library-select {
+    position: relative;
+}
+
+.pdf-search-results-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--pfv-text-secondary);
+    background-color: var(--pfv-bg-color);
+    border-bottom: 1px solid var(--pfv-border-color);
+}
+
+.pdf-search-result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.pdf-search-result-item:hover {
+    background-color: var(--pfv-bg-color);
+}
+
+.result-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 15px;
+}
+
+.result-date {
+    color: var(--pfv-text-secondary);
+    font-size: 13px;
+}
+
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .pdf-controls-container {
+        flex-direction: column;
+    }
+    .pdf-split-view.horizontal {
+        flex-direction: column;
+    }
+    .pdf-pane {
+        min-width: 100%;
+        min-height: 400px;
+    }
+}
